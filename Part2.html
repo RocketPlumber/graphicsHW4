@@ -1,0 +1,74 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"> 
+
+<title>Equations in Fragment Shader</title>
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="FragCircle.js"></script> 
+
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+attribute vec4 vPosition;
+attribute vec4 vColor;
+varying vec4 fColor;
+varying vec4 test;
+uniform float t;
+void main(){
+    gl_Position = vPosition;
+		fColor = vColor;
+    test = gl_Position;
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+precision mediump float;
+
+
+varying vec4 test;
+
+float map(float x, float in_min, float in_max, float out_min, float out_max)
+{
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+float g(float t){
+  if (t <= 0.0) return 0.0;
+  if (t >= 1.0) return 1.0;
+  return t*t*(3.0 - 2.0 * t);
+}
+
+float f(float t, float eta){
+  float over = t/eta;
+  return g(over);
+}
+
+void main(void)
+{
+    /*ANSWER 2 PART 1*/
+    vec4 drawPos;
+    float eta = 0.02;
+
+    /* map screenspace to be from 0 to 1 to display X only in the given interval */
+    drawPos.x = map(gl_FragCoord.x, 0.0, 1024.0, 0.0, 1.0);
+    drawPos.y = map(gl_FragCoord.y, 0.0, 1024.0, 0.0, 1.0);
+
+
+    float t = (3.0*(drawPos.x * drawPos.x)) + (2.0*(drawPos.x * drawPos.x * drawPos.x)) - drawPos.y;
+    t = abs(t);
+
+    vec4 mCol = vec4( 0.0, 1.0 - f(t, eta), 0.0, 1.0 );
+
+    gl_FragColor = mCol;
+}
+</script>
+</head>
+<body>
+   <canvas id="gl-canvas" width="1024" height="1024">
+    HTML5 Canvas not supported!
+   </canvas>
+</body>
+</html>
+
